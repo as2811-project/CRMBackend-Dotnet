@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRMBackend", "CRMBackend\CRMBackend.csproj", "{54B66759-5DC4-4832-BC45-EEE764C2D59E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54B66759-5DC4-4832-BC45-EEE764C2D59E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54B66759-5DC4-4832-BC45-EEE764C2D59E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54B66759-5DC4-4832-BC45-EEE764C2D59E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54B66759-5DC4-4832-BC45-EEE764C2D59E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
