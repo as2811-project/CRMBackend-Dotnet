@@ -64,7 +64,7 @@ app.MapGet("/api/contacts/{id}", async (int id, Supabase.Client client) =>
     return Results.Ok(contactResponse);
 });
 
-app.MapDelete("/api/contacts/{id", async (int id, Supabase.Client client) =>
+app.MapDelete("/api/contacts/{id}", async (int id, Supabase.Client client) =>
 {
     await client
         .From<Contacts>()
