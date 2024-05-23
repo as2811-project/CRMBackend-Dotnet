@@ -31,6 +31,7 @@ app.MapPost("/api/contacts", async (
 {
     var contact = new Contacts
     {
+        contact_id = request.contact_id,
         first_name = request.first_name,
         last_name = request.last_name,
         email = request.email,
@@ -72,6 +73,63 @@ app.MapDelete("/api/contacts/{id}", async (int id, Supabase.Client client) =>
         .Delete();
     return Results.NoContent();
 });
+
+app.MapPost("/api/deals", async (
+    DealRequests.CreateDealRequest request,
+    Supabase.Client client) =>
+{
+    var deal = new Deals
+    {
+        deal_name = request.deal_name,
+        value = request.value,
+        deal_stage = request.deal_stage,
+        product = request.product
+    };
+    var response = await client.From<Deals>().Insert(deal);
+    var newDeal = response.Models.First();
+    return Results.Ok(newDeal.deal_id);
+});
+
+app.MapGet("/api/deals/{id}", async (int id, Supabase.Client client) =>
+{
+    var response = await client
+        .From<Deals>()
+        .Where(n => n.deal_id == id)
+        .Get();
+    var deal = response.Models.FirstOrDefault();
+    if (deal is null)
+    {
+        return Results.NotFound();
+    }
+
+    var dealResponse = new DealRequests.NewDealResponse()
+    {
+        deal_id = deal.deal_id,
+        deal_name = deal.deal_name,
+        deal_stage = deal.deal_stage,
+        value = deal.value
+    };
+    return Results.Ok(dealResponse);
+});
+
+app.MapPost("/api/accounts", async (
+    AccountRequests.CreateAccount request,
+    Supabase.Client client) =>
+{
+    var account = new Accounts
+    {
+        company_name = request.company_name,
+        revenue = request.revenue,
+        employee_count = request.employee_count,
+        founded_date = request.founded_date,
+        phone_number = request.phone_number
+    };
+    var response = await client.From<Accounts>().Insert(account);
+    var newDeal = response.Models.First();
+    return Results.Ok(newDeal.account_id);
+});
+
+
 
 app.UseHttpsRedirection();
 app.Run();
