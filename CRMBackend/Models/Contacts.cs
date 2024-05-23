@@ -5,7 +5,7 @@ namespace CRMBackend.Models;
 [Table("Contacts")]
 public class Contacts : BaseModel
 {
-    [PrimaryKey("id",false)]
+    [PrimaryKey("contact_id",true)]
     public int contact_id { get; set; }
     
     [Column("first_name")]
@@ -18,7 +18,7 @@ public class Contacts : BaseModel
     public string email { get; set; }
     
     [Column("phone_number")]
-    public long phone_number { get; set; }
+    public string phone_number { get; set; }
     
     [Column("address")]
     public string address { get; set; }
