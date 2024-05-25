@@ -28,8 +28,8 @@ if (app.Environment.IsDevelopment())
 app.MapPost("/auth/login", async (
     AuthService.Login request, Client client) =>
 {
-    var response = await client.Auth.SignIn(request.email, request.password);
-    return Results.Ok(response);
+    var session = await client.Auth.SignIn(request.email, request.password);
+    return Results.Ok(session);
 });
 
 app.MapPost("/auth/reg", async (
