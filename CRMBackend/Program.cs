@@ -25,6 +25,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapPost("/auth/login", async (
+    AuthService.Login request, Client client) =>
+{
+    var response = await client.Auth.SignIn(request.email, request.password);
+    return Results.Ok(response);
+});
+
+app.MapPost("/auth/reg", async (
+    AuthService.CreateUser request, Client client) =>
+{
+    var response = await client.Auth.SignUp(request.email, request.password);
+    return Results.Ok(response);
+});
+
 app.MapPost("/api/contacts", async (
     CreateContactRequest request,
     Supabase.Client client) =>
