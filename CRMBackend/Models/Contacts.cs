@@ -26,6 +26,6 @@ public class Contacts : BaseModel
     [Column("Related Account")]
     public string related_account { get; set; }
     
-    [Column("Agent")]
+    [Column("Owner")]
     public string Agent { get; set; }
 }

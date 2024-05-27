@@ -4,7 +4,6 @@ using CRMBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Supabase;
-using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,8 +85,15 @@ app.MapGet("/api/contacts", async (HttpContext httpContext, Supabase.Client clie
     await client.Auth.SetSession(jwtToken, refreshToken, false);
     var results = await client.From<Contacts>().Get();
     var contacts = results.Models;
+    var responseContacts = contacts.Select(contact => new NewContactResponse
+    {
+        contact_id = contact.contact_id,
+        first_name = contact.first_name,
+        last_name = contact.last_name,
+        email = contact.email
+    }).ToList();
 
-    return Results.Ok(contacts);
+    return Results.Ok(responseContacts);
 });
 
 app.MapGet("/api/contacts/{id}", async (HttpContext httpContext, int id, Supabase.Client client) =>
