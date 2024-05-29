@@ -1,4 +1,3 @@
-using CRMBackend.Controllers;
 using CRMBackend.Modules;
 using Supabase;
 
