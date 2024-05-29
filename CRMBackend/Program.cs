@@ -4,6 +4,8 @@ using CRMBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Supabase;
+using Supabase.Gotrue;
+using Client = Supabase.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,7 @@ builder.Services.AddScoped<Supabase.Client>(_ =>
         }));
 
 var app = builder.Build();
+app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000"));
 
 if (app.Environment.IsDevelopment())
 {
@@ -37,10 +40,16 @@ app.MapPost("/auth/login", async (
 {
     var session = await client.Auth.SignIn(request.email, request.password);
 
-    // Assuming the session object contains the JWT in a property called AccessToken
     jwtToken = session.AccessToken;
     refreshToken = session.RefreshToken;
     return Results.Ok(session);
+});
+
+app.MapPost("/auth", async (AuthService.Login request, Client client) =>
+{
+    var attrs = new UserAttributes { Password = request.password };
+    var response = await client.Auth.Update(attrs);
+    return Results.Ok(response);
 });
 
 
@@ -56,11 +65,7 @@ app.MapPost("/api/contacts", async (
     CreateContactRequest request,
     Supabase.Client client) =>
 {
-    if (string.IsNullOrEmpty(jwtToken))
-    {
-        return Results.Unauthorized();
-    }
-    httpContext.Request.Headers["Authorization"] = $"`Bearer {jwtToken}`";
+    //httpContext.Request.Headers["Authorization"] = $"`Bearer {jwtToken}`";
     var contact = new Contacts
     {
         contact_id = request.contact_id,
@@ -77,32 +82,49 @@ app.MapPost("/api/contacts", async (
 
 app.MapGet("/api/contacts", async (HttpContext httpContext, Supabase.Client client) =>
 {
-    if (string.IsNullOrEmpty(jwtToken))
+    if (!httpContext.Request.Headers.TryGetValue("Authorization", out var authorizationHeader) ||
+        !httpContext.Request.Headers.TryGetValue("X-Refresh-Token", out var refreshTokenHeader))
     {
         return Results.Unauthorized();
     }
 
-    await client.Auth.SetSession(jwtToken, refreshToken, false);
-    var results = await client.From<Contacts>().Get();
-    var contacts = results.Models;
-    var responseContacts = contacts.Select(contact => new NewContactResponse
-    {
-        contact_id = contact.contact_id,
-        first_name = contact.first_name,
-        last_name = contact.last_name,
-        email = contact.email
-    }).ToList();
+    // The JWT token is typically in the format "Bearer <token>"
+    var jwtToken = authorizationHeader.ToString().Split(' ').Last();
+    var refreshToken = refreshTokenHeader.ToString();
 
-    return Results.Ok(responseContacts);
+    try
+    {
+        var session = await client.Auth.SetSession(jwtToken,refreshToken,false);
+
+        if (session == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var results = await client.From<Contacts>().Get();
+        var contacts = results.Models;
+
+        var responseContacts = contacts.Select(contact => new NewContactResponse
+        {
+            contact_id = contact.contact_id,
+            first_name = contact.first_name,
+            last_name = contact.last_name,
+            email = contact.email
+        }).ToList();
+
+        return Results.Ok(responseContacts);
+    }
+    catch (Exception ex)
+    {
+        // Handle any errors that occur during the process
+        return Results.Problem(detail: ex.Message);
+    }
 });
+
 
 app.MapGet("/api/contacts/{id}", async (HttpContext httpContext, int id, Supabase.Client client) =>
 {
-    if (string.IsNullOrEmpty(jwtToken))
-    {
-        return Results.Unauthorized();
-    }
-    await client.Auth.SetSession(jwtToken, refreshToken, false);
+    //await client.Auth.SetSession(jwtToken, refreshToken, false);
     var response = await client
         .From<Contacts>()
         .Where(n => n.contact_id == id)
